@@ -34,6 +34,7 @@
 	registroInvalido: .asciz "Registro inexistente.\n"
 	listaVazia: .asciz "Lista vazia.\n"
 	criandoLista: .asciz "Nova lista criada.\n"
+	raInserido: .asciz "RA já inserido, insira novamente.\n"
 
 	intscanf: .asciz "%d"
 	stringscanf: .asciz "%s"
@@ -65,41 +66,53 @@ criaLista:
 	call printf
 	addl $4, %esp
 
-	pushl $criandoLista
-	call printf
-	addl $4, %esp
-
-	movl ptrinicial, %eax
-	cmp $0, %eax
+	movl ptrinicial, %ecx
+comparar:
+	cmp $0, %ecx
 	je vazio
+	movl %ecx, %eax
+	call getPtr
+	movl (%ecx), %edi
 	pushl %eax
 	call free
 	addl $4, %esp
+	movl %edi, %ecx
+	jmp comparar
 
 vazio:
 	movl NULL, %eax
 	movl %eax, ptrinicial
 	movl %eax, ptrfinal
+	movl %eax, ptranterior
+	movl %eax, ultimoInserido
 	
+	pushl $criandoLista
+	call printf
+	addl $4, %esp
+
 	call getchar
 	call getchar
 	ret
-
 
 .type insereDado, @function
 insereDado:
 	call clearSystem
 	call allocarEspaco
-	call allocarPtr
-	call pedirDados
-	ret
-
-.type pedirDados, @function
-pedirDados:
+	
 	pushl $telaInserir
 	call printf
 	addl $4, %esp
 
+repetirRa:
+	call pedirRa
+	call allocarPtr
+	cmp $1, %eax
+	je repetirRa
+	call pedirDados
+	ret
+
+.type pedirRa, @function
+pedirRa:
 	movl endereco, %ecx
 	pushl %ecx
 	
@@ -108,9 +121,13 @@ pedirDados:
 	addl $4, %esp
 	pushl $intscanf
 	call scanf
-	addl $4, %esp
+	addl $8, %esp
+
+	ret
 	
-	popl %ecx
+.type pedirDados, @function
+pedirDados:
+	movl endereco, %ecx
 
 	movl raSize, %eax
 	addl %eax, %ecx
@@ -134,14 +151,7 @@ pedirDados:
 	addl $4, %esp
 	pushl $stringscanf
 	call scanf
-	addl $4, %esp
-
-	popl %ecx
-	
-	movl cursoSize, %eax
-	addl %eax, %ecx
-	movl NULL, %edx
-	movl %edx, (%ecx)
+	addl $8, %esp
 
 	ret
 
@@ -157,20 +167,64 @@ allocarEspaco:
 .type allocarPtr, @function
 allocarPtr:
 	movl ptrinicial, %eax
+	movl %eax, ptranterior
 	movl endereco, %ebx
 	cmp $0, %eax
-	jg alterarPtr
+	jg compararRegistros
+	movl %ebx, %ecx
+	call getPtr
+	movl NULL, %edx
+	movl %edx, (%ecx)
 	movl %ebx, ptrinicial
 	jmp manterPtr
 
-alterarPtr:
-	movl ultimoInserido, %ecx
+compararRegistros:
+	movl (%eax), %edi
+	cmp %edi, (%ebx)
+	jg maior
+	je igual
+	movl %eax, %edi
+	movl ptrinicial, %eax
+	cmp %edi, %eax
+	je moverPtrinicial
+	movl %ebx, %ecx
 	call getPtr
+	movl %edi, (%ecx)
+	movl ptranterior, %ecx
+	call getPtr
+	movl %ebx, (%ecx)
+	jmp alterarUltimo
+
+igual:
+	pushl $raInserido
+	call printf
+	addl $4, %esp
+	movl $1, %eax
+	jmp fim
+
+moverPtrinicial:
+	movl %ebx, ptrinicial
+	movl %ebx, %ecx
+	call getPtr
+	movl %edi, (%ecx)
+	jmp alterarUltimo
+
+maior:
+	movl %eax, %ecx
+	movl %eax, ptranterior
+	call getPtr
+	movl (%ecx), %eax
+	cmp $0, %eax
+	jne compararRegistros
 	movl %ebx, (%ecx)
 
 manterPtr:
 	movl %ebx, ptrfinal
+
+alterarUltimo:
 	movl %ebx, ultimoInserido
+
+fim:
 	ret
 
 
@@ -193,7 +247,6 @@ removeDado:
 	call consultaDado
 	cmp $0, %eax
 	jg continuarRemover
-	call listaNULL
 	jmp fimRemove
 
 continuarRemover:

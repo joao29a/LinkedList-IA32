@@ -35,6 +35,7 @@
 	listaVazia: .asciz "Lista vazia.\n"
 	criandoLista: .asciz "Nova lista criada.\n"
 	raInserido: .asciz "RA já inserido, insira novamente.\n"
+	deletado: .asciz "\nRegistro apagado."
 
 	intscanf: .asciz "%d"
 	stringscanf: .asciz "%s"
@@ -294,6 +295,9 @@ liberar:
 	pushl %eax
 	call free
 	addl $4, %esp
+	pushl $deletado
+	call printf
+	addl $4, %esp
 
 fimRemove:
 	call getchar
@@ -338,6 +342,7 @@ enquantoNotEncontrou:
 	pushl $registroInvalido
 	call printf
 	addl $4, %esp
+	movl $0, %eax
 	jmp returnRet
 
 encontrou:

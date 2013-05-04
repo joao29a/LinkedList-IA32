@@ -4,14 +4,27 @@ FLAGS=-g --32
 LDFLAGS=-lc -dynamic-linker
 LIB=/lib/ld-linux.so.2
 OFLAG=-o
-SRC=RONALD/RONALDO
+SRC=src/linkedList
 EMULADOR=-m elf_i386
-EXE=RONALDO
+EXE=linkedList
 
-all: assembler linker
+all: 64bits
+
+32bits: linker32
+
+assembler32:
+	$(CC) $(SRC).s $(OFLAG) $(SRC).o
+
+linker32: assembler32
+	$(LD) $(SRC).o $(LDFLAGS) $(LIB) $(OFLAG) $(EXE)
+
+64bits: linker
 
 assembler:
 	$(CC) $(FLAGS) $(SRC).s $(OFLAG) $(SRC).o
 
-linker:
+linker: assembler
 	$(LD) $(SRC).o $(LDFLAGS) $(LIB) $(OFLAG) $(EXE) $(EMULADOR)
+
+install-lc:
+	sudo apt-get install gcc-multilib

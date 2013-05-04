@@ -26,7 +26,7 @@ assembler:
 linker: assembler
 	$(LD) $(SRC).o $(LDFLAGS) $(LIB) $(OFLAG) $(EXE) $(EMULADOR)
 
-install-lc:
+multilib:
 	sudo apt-get install gcc-multilib
 
 clean:

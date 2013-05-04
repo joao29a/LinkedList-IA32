@@ -28,3 +28,7 @@ linker: assembler
 
 install-lc:
 	sudo apt-get install gcc-multilib
+
+clean:
+	rm -rf $(SRC).o
+	rm -rf $(EXE)

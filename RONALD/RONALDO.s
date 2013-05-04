@@ -217,6 +217,10 @@ maior:
 	cmp $0, %eax
 	jne compararRegistros
 	movl %ebx, (%ecx)
+	movl %ebx, %ecx
+	call getPtr
+	movl NULL, %edx
+	movl %edx, (%ecx)
 
 manterPtr:
 	movl %ebx, ptrfinal

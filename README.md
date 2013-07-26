@@ -1,10 +1,7 @@
 Linked List in Assembly IA32
 =======
 
-Integrantes:
-- João Almeida de Jesus Junior R.A: 61440
-- Lucas Georges Helal R.A: 67645
-- Rodrigo Maller Martins R.A: 68773
+by João Almeida de Jesus Jr
 
 Compilação:
  - Digite "make" na linha de comando para compilar. A compilação padrão é em uma arquitetura de 64 bits.
